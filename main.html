@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="main.css" rel="stylesheet">
+    <link href="main.js" rel="functionality">
+    <title>Deadzone</title>
+</head>
+<body>
+    <h1>Welcome to Deadzone</h1>
+    <div id="output"></div>
+    <button onclick="attack()">Attack</button>
+    <button onclick="takeHealthPotion()">Take Health Potion</button>
+    <button onclick="run()">Run</button>
+
+    <script>
+        // ENEMY VARIABLES
+        const enemies = ["Skeleton", "Zombie", "Warrior", "Assassin"];
+        const maxEnemyHealth = 75;
+        const enemyAttackDamageToHero = 25;
+
+        // PLAYER VARIABLES
+        let heroHealth = 100;
+        const attackDamageToEnemy = 50;
+        let numHealthPotion = 3;
+        const healthPotionHealAmount = 30;
+        const healthPotionDropChance = 50;
+
+        let currentEnemy = {};
+        let gameRunning = true;
+
+        function getRandomNumber(max) {
+            return Math.floor(Math.random() * max + 1);
+        }
+
+        function displayMessage(message) {
+            document.getElementById('output').innerHTML += `<p>${message}</p>`;
+        }
+
+        function startGame() {
+            displayMessage("Welcome to Deadzone");
+            nextEnemy();
+        }
+
+        function nextEnemy() {
+            if (!gameRunning) return;
+            let enemyHealth = getRandomNumber(maxEnemyHealth);
+            let enemyIndex = getRandomNumber(enemies.length) - 1;
+            currentEnemy = {
+                name: enemies[enemyIndex],
+                health: enemyHealth
+            };
+            displayMessage(`# ${currentEnemy.name} has appeared #`);
+            displayStatus();
+        }
+
+        function displayStatus() {
+            if (!gameRunning) return;
+            displayMessage(`Your Health is: ${heroHealth}`);
+            displayMessage(`${currentEnemy.name} Health is: ${currentEnemy.health}`);
+        }
+
+        function attack() {
+            if (!gameRunning) return;
+            let damageToEnemy = getRandomNumber(attackDamageToEnemy);
+            let damageToHero = getRandomNumber(enemyAttackDamageToHero);
+
+            currentEnemy.health -= damageToEnemy;
+            heroHealth -= damageToHero;
+
+            displayMessage(`You strike the ${currentEnemy.name} for ${damageToEnemy}`);
+            displayMessage(`${currentEnemy.name} strikes you for ${damageToHero}`);
+
+            if (heroHealth <= 0) {
+                displayMessage("You have taken too much damage. You are too weak to continue.");
+                gameRunning = false;
+                return;
+            }
+
+            if (currentEnemy.health <= 0) {
+                displayMessage(`${currentEnemy.name} was defeated!`);
+                displayMessage(`You have ${heroHealth} health`);
+                if (getRandomNumber(100) < healthPotionDropChance) {
+                    numHealthPotion++;
+                    displayMessage(`The enemy gave you a health potion.`);
+                }
+                displayMessage(`You have ${numHealthPotion} health potions left.`);
+                nextEnemy();
+            } else {
+                displayStatus();
+            }
+        }
+
+        function takeHealthPotion() {
+            if (!gameRunning) return;
+            if (numHealthPotion > 0) {
+                heroHealth += healthPotionHealAmount;
+                numHealthPotion--;
+                displayMessage(`You used a health potion and healed ${healthPotionHealAmount}`);
+                displayMessage(`You now have ${heroHealth} health`);
+                displayMessage(`You have ${numHealthPotion} health potions left.`);
+            } else {
+                displayMessage("You have no health potions left. Defeat an enemy to get more.");
+            }
+        }
+
+        function run() {
+            if (!gameRunning) return;
+            displayMessage(`You ran away from ${currentEnemy.name}`);
+            nextEnemy();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
